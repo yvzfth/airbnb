@@ -6,6 +6,18 @@
 
 `npm i tailwind-scrollbar-hide`
 
+## install react date range
+
+`npm i --save react-date-range`
+
+## install reaact date fns
+
+`npm i --save react date-fns`
+
+## Install progress bar
+
+`npm i @badrap/bar-of-progress`
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started

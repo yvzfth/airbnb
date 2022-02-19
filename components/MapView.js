@@ -1,105 +1,137 @@
-import React, { useState } from "react";
-import Map, { Marker, Popup } from "react-map-gl";
-import getCenter from "geolib/es/getCenter";
-import mapboxgl from "mapbox-gl";
+import mapboxgl from '!mapbox-gl';
+import getCenter from 'geolib/es/getCenter';
+import React, { useEffect, useRef, useState } from 'react';
+import Map, { Marker, Popup } from 'react-map-gl';
+mapboxgl.accessToken = process.env.mapbox_key;
 function MapView({ searchResults }) {
-  const mapDiv = () => <div></div>;
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const marker = useRef(null);
+  const geojson = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-77.032, 38.913],
+        },
+        properties: {
+          title: 'Mapbox',
+          description: 'Washington, D.C.',
+        },
+      },
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [-122.414, 37.776],
+        },
+        properties: {
+          title: 'Mapbox',
+          description: 'San Francisco, California',
+        },
+      },
+    ],
+  };
+  // useEffect(() => {
+  //   if (marker.current) return;
+  //   if (map.current) {
+  //     for (const feature of geojson.features) {
+  //       // create a HTML element for each feature
+  //       const image = () => <img src='./favicon.ico' alt='' />;
+
+  //       // make a marker for each feature and add to the map
+  //       marker.current = new mapboxgl.Marker(image)
+  //         .setLngLat(feature.geometry.coordinates)
+  //         .addTo(<div></div>);
+  //     }
+  //   }
+  // });
+  useEffect(() => {
+    if (map.current) return; // initialize map only once
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/yvzfth/ckzshkwjv000k14ngydzgk1ck',
+      center: [lng, lat],
+      zoom: zoom,
+    });
+  });
+  useEffect(() => {
+    if (!map.current) return; // wait for map to initialize
+    map.current.on('move', () => {
+      setLng(map.current.getCenter().lng.toFixed(4));
+      setLat(map.current.getCenter().lat.toFixed(4));
+      setZoom(map.current.getZoom().toFixed(2));
+    });
+  });
   const coordinates = searchResults.map((result) => ({
     longitude: result.long,
     latitude: result.lat,
   }));
 
   const center = getCenter(coordinates);
-  const [viewport, setViewport] = useState({
-    latitude: center.latitude,
-    longitude: center.longitude,
-    zoom: 11,
-  });
-
-  // const map = new mapboxgl.Map({
-  //   style: "mapbox://styles/mapbox/light-v10",
-  //   center: [center.longitude, center.latitude],
-  //   zoom: 3,
+  // const [viewport, setViewport] = useState({
+  //   latitude: center.latitude,
+  //   longitude: center.longitude,
   // });
-  // const geojson = {
-  //   type: "FeatureCollection",
-  //   features: [
-  //     {
-  //       type: "Feature",
-  //       geometry: {
-  //         type: "Point",
-  //         coordinates: [-77.032, 38.913],
-  //       },
-  //       properties: {
-  //         title: "Mapbox",
-  //         description: "Washington, D.C.",
-  //       },
-  //     },
-  //     {
-  //       type: "Feature",
-  //       geometry: {
-  //         type: "Point",
-  //         coordinates: [-122.414, 37.776],
-  //       },
-  //       properties: {
-  //         title: "Mapbox",
-  //         description: "San Francisco, California",
-  //       },
-  //     },
-  //   ],
-  // };
-  // for (const feature of geojson.features) {
-  //   // create a HTML element for each feature
-  //   const el = document.createElement("div");
-  //   el.className = "marker";
+  const [lng, setLng] = useState(center.longitude);
+  const [lat, setLat] = useState(center.latitude);
+  const [zoom, setZoom] = useState(11);
 
-  //   // make a marker for each feature and add to the map
-  //   new mapboxgl.Marker(el).setLngLat(feature.geometry.coordinates).addTo(map);
-  // }
   return (
-    // <Map
-    //   initialViewState={{
-    //     ...viewport,
-    //   }}
-    //   mapboxAccessToken={process.env.mapbox_key}
-    //   style={{ width: "100%" }}
-    //   mapStyle="mapbox://styles/yvzfth/ckzshkwjv000k14ngydzgk1ck"
-    //   onViewportChange={(nextViewport) => setViewport(nextViewport)}
-    // >
-    //   {searchResults.map((result) => (
-    //     <div key={result.long}>
-    //       <Marker
-    //         longitude={result.long}
-    //         latitude={result.lat}
-    //         offsetLeft={-19}
-    //         offsetTop={-37}
-    //       >
-    //         <p>❤❤❤🔍❤❤❤</p>
-    //       </Marker>
-    //     </div>
-    //   ))}
-    // </Map>
-
-    <iframe
-      style={{ width: "100%", height: "100%", border: "none" }}
-      src={`https://api.mapbox.com/styles/v1/yvzfth/ckzshkwjv000k14ngydzgk1ck.html?title=false&access_token=${process.env.mapbox_key}&zoomwheel=true#9/${center.latitude}/${center.longitude}`}
-      title="Streets"
-    >
-      {searchResults.map((result) => (
-        <div key={result.long}>
-          {/* <Marker
-            longitude={result.long}
-            latitude={result.lat}
-            offsetLeft={-19}
-            offsetTop={-37}
-          >
-            <p>❤❤❤🔍❤❤❤</p>
-          </Marker> */}
-        </div>
-      ))}
-    </iframe>
+    <div>
+      {/* <div className='z-1  top-0 left-0 border-2 m-4 text-white p-6 bg-slate-400'>
+        // Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
+       
+      </div> */}
+      <div ref={mapContainer} className=' h-full w-[800px]' />
+    </div>
   );
+  // return (
+  //   <Map
+  //     initialViewState={{
+  //       ...viewport,
+  //       zoom: 10,
+  //     }}
+  //     mapboxAccessToken={process.env.mapbox_key}
+  //     style={{ width: '100%', height: '100%' }}
+  //     mapStyle='mapbox://styles/yvzfth/ckzshkwjv000k14ngydzgk1ck'
+  //     onViewportChange={(nextViewport) => setViewport(nextViewport)}
+  //   >
+  //     {searchResults.map((result) => (
+  //       <div key={result.long}>
+  //         <Marker
+  //           longitude={result.long}
+  //           latitude={result.lat}
+  //           offsetLeft={-20}
+  //           offsetTop={-10}
+  //         >
+  //           <p>❤❤❤🔍❤❤❤</p>
+  //         </Marker>
+  //       </div>
+  //     ))}
+  //   </Map>
+  // );
 }
+// <iframe
+//   style={{ width: "100%", height: "100%", border: "none" }}
+//   src={`https://api.mapbox.com/styles/v1/yvzfth/ckzshkwjv000k14ngydzgk1ck.html?title=false&access_token=${process.env.mapbox_key}&zoomwheel=true#9/${center.latitude}/${center.longitude}`}
+//   title="Streets"
+// >
+//   {searchResults.map((result) => (
+//     <div key={result.long}>
+//       {/* <Marker
+//         longitude={result.long}
+//         latitude={result.lat}
+//         offsetLeft={-19}
+//         offsetTop={-37}
+//       >
+//         <p>❤❤❤🔍❤❤❤</p>
+//       </Marker> */}
+//     </div>
+//   ))}
+// </iframe>
 // import React, { Component } from "react";
 // import { render } from "react-dom";
 // import MapGL, {

@@ -23,3 +23,8 @@ a {
 * {
   box-sizing: border-box;
 }
+
+/* don't show calender's left side*/
+.rdrDefinedRangesWrapper {
+  display: none;
+}
